@@ -1960,6 +1960,7 @@ class BaseOperator(object):
             default_args=None,
             adhoc=False,
             priority_weight=1,
+            priority_sum_downstream=True,
             queue=configuration.get('celery', 'default_queue'),
             pool=None,
             sla=None,
@@ -2032,6 +2033,7 @@ class BaseOperator(object):
         self.params = params or {}  # Available in templates!
         self.adhoc = adhoc
         self.priority_weight = priority_weight
+        self.priority_sum_downstream = priority_sum_downstream
         self.resources = Resources(**(resources or {}))
         self.run_as_user = run_as_user
 
@@ -2059,6 +2061,7 @@ class BaseOperator(object):
             'wait_for_downstream',
             'adhoc',
             'priority_weight',
+            'priority_sum_downstream',
             'sla',
             'execution_timeout',
             'on_failure_callback',
@@ -2207,10 +2210,13 @@ class BaseOperator(object):
 
     @property
     def priority_weight_total(self):
-        return sum([
-            t.priority_weight
-            for t in self.get_flat_relatives(upstream=False)
-        ]) + self.priority_weight
+        if self.priority_sum_downstream:
+            return sum([
+                t.priority_weight
+                for t in self.get_flat_relatives(upstream=False)
+            ]) + self.priority_weight
+        else:
+            return self.priority_weight
 
     def pre_execute(self, context):
         """
