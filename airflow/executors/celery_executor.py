@@ -46,6 +46,7 @@ class CeleryConfig(object):
     CELERYD_CONCURRENCY = configuration.getint('celery', 'CELERYD_CONCURRENCY')
     CELERY_DEFAULT_QUEUE = DEFAULT_QUEUE
     CELERY_DEFAULT_EXCHANGE = DEFAULT_QUEUE
+    CELERYD_MAX_TASKS_PER_CHILD = configuration.getint('celery', 'CELERYD_MAX_TASKS_PER_CHILD')
 
 app = Celery(
     configuration.get('celery', 'CELERY_APP_NAME'),
